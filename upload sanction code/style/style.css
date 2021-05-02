@@ -1,0 +1,28 @@
+.header{
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    background-color: #014461;
+    padding: 7px;
+
+}
+form{
+    display: flex;
+    flex-direction: row;
+    margin:2% 2% 2%;
+}
+.upload{
+    background-color: #F9F9F9;
+    width: 20%;
+    margin-right: 1%;
+}
+.bold{
+    font-weight: bold;
+}
+.magin-left-2{
+    margin-left: 2%;
+}
+.download-btn{
+    float: right;
+    margin-left: 2%;
+}
