@@ -2,6 +2,7 @@
 $obj = new Sanction();
  $fname = 'san-output.xml';
 
+
  $up = 0;
  if(isset($_POST['submit']))
  {
@@ -58,279 +59,355 @@ class Sanction {
     public $output_san = 'sanction.csv';
 
   // this function call when uploaded file is EU.csv or EU sanction.csv
-function eu()
-{
-    $i=0; 
-    $str = '';
-    $this->table_header = "<th>No</th>
-                        <th>Entity_LogicalId</th>
-                        <th>Entity_EU_ReferenceNumber</th>
-                        <th>Entity_Regulation_Programme</th>
-                        <th>NameAlias_LastName</th>
-                        <th>NameAlias_FirstName</th>
-                        <th>NameAlias_MiddleName</th>
-                        <th>NameAlias_WholeName</th>
-                        <th>NameAlias_Gender</th>";
+    function eu()
+    {
+        $i=0; 
+        $str = '';
+        $this->table_header = "<th>No</th>
+                                <th>NameAlias_LastName</th>
+                                <th>NameAlias_FirstName</th>
+                                <th>NameAlias_MiddleName</th>
+                                <th>NameAlias_WholeName</th>
+                                <th>BirthDate_BirthDate</th>
+                                <th>BirthDate_Day</th>
+                                <th>BirthDate_Month</th>
+                                <th>BirthDate_Year</th>";
+        $col = array('NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','BirthDate_BirthDate','BirthDate_Day','BirthDate_Month','BirthDate_Year');
 
-    $col = array('Entity_LogicalId','Entity_EU_ReferenceNumber','Entity_Regulation_Programme','NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','NameAlias_Gender');
-
-    if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
-        $data = fgetcsv($handle, 10000, ";");
-        // print_r($data);
-        $col_index =  $this->getIndex($data , $col);
-        //print_r($col_index);
-        while($data = fgetcsv($handle, 10000, ";")){
-            $i++;
-            // echo $table;
-            $this->table .= "<tr><td> $i </td>";
-            // echo $table;  
-            foreach($col_index as $key =>$index)
-            {
-                // array_push($str, $data[$index]);
-               $str .= "$data[$index];";
-                $this->table .= "<td>$data[$index]</td>";
-            }
-            $str .= "\n";
-            $this->table .= "</tr>";
-        }
-        $this->putCsvFile($col,$str);
-    }
-    $str = ''; 
-} 
-// this function call when uploaded file is EU.csv or EU sanction.csv or un.csv
-function un()
-{
-    $i=0; 
-    $str = '';
-    $this->table_header = "<th>No</th><th>NameAlias_FirstName</th><th>NameAlias_LastName</th><th>BirthDate_BirthDate</th><th>NameAlias_Function</th><th>Identification_TypeDescription</th><th>Identification_Number</th>";
-    $col = array('NameAlias_FirstName','NameAlias_LastName','BirthDate_BirthDate','NameAlias_Function','Identification_TypeDescription','Identification_Number');
-
-    if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
-        $data = fgetcsv($handle, 10000, ";");
-        // print_r($data);
-        $col_index =  $this->getIndex($data , $col);
-        //print_r($col_index);
-        while($data = fgetcsv($handle, 10000, ";")){
-            $i++;
-            // echo $table;
-            $this->table .= "<tr><td> $i </td>";
-            // echo $table;  
-            foreach($col_index as $key =>$index)
-            {
-                // array_push($str, $data[$index]);
-               $str .= "$data[$index];";
-                $this->table .= "<td>$data[$index]</td>";
-            }
-            $str .= "\n";
-            $this->table .= "</tr>";
-        }
-        $this->putCsvFile($col,$str);
-    }
-    $str = ''; 
-}
-// this function call when uploaded file is HM.csv or HM2.csv
-function hm_and_hm2(){
-    $i=0; $str = '';
-    $this->table_header = "<th>No</th>
-                            <th>Name 1</th>
-                            <th>Name 2</th>
-                            <th>Name 3</th>
-                            <th>Name 4</th>
-                            <th>Name 4</th>
-                            <th>Name 6</th>
-                            <th>DOB</th>
-                            <th>Nationality</th>
-                            <th>Country of Birth</th>
-                            <th>NI Number</th>
-                            <th>Listed On</th>
-                            <th>Last Updated</th>";
-     $col = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6','DOB','Nationality','Country of Birth','NI Number','Listed On','Last Updated');    
-
-     if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
-        // return header in row 2;
-        $header_arr = $this->return_header();
-        //get indexes of column
-        $col_index = $this->getIndex($header_arr, $col);
-
-        while($data = fgetcsv($handle, 10000, ","))
-        {
-            $i++;
-            if($i>2)
-            {
+        if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
+            $data = fgetcsv($handle, 10000, ";");
+            // print_r($data);
+            $col_index =  $this->getIndex($data , $col);
+            //print_r($col_index);
+            while($data = fgetcsv($handle, 10000, ";")){
+                $i++;
+                // echo $table;
                 $this->table .= "<tr><td> $i </td>";
+                // echo $table;  
+                $row ='';
                 foreach($col_index as $key =>$index)
                 {
-                    $str .= "$data[$index];";
+                    // array_push($str, $data[$index]);
+                $row .= "$data[$index];";
                     $this->table .= "<td>$data[$index]</td>";
                 }
+                //check if not empty row
+                if($this->validStringLength($row))
+                {
+                continue;
+                }
+                else{
+                    $str .= $row;
+                    $str .= "\n";
+                    $this->table .= "</tr>";
+                }
+            }
+            $this->putCsvFile($col,$str);
+        }
+        $str = ''; 
+    } 
+    // this function call when uploaded file is EU.csv or EU sanction.csv or un.csv
+    function un()
+    {
+        $i=0; 
+        $str = '';
+        $this->table_header = "<th>No</th><th>NameAlias_FirstName</th><th>NameAlias_LastName</th><th>BirthDate_BirthDate</th><th>NameAlias_Function</th><th>Identification_TypeDescription</th><th>Identification_Number</th>";
+        $col = array('NameAlias_FirstName','NameAlias_LastName','BirthDate_BirthDate','NameAlias_Function','Identification_TypeDescription','Identification_Number');
+
+        if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
+            $data = fgetcsv($handle, 10000, ";");
+            // print_r($data);
+            $col_index =  $this->getIndex($data , $col);
+            //print_r($col_index);
+            while($data = fgetcsv($handle, 10000, ";")){
+                $i++; $row = '';
+                // echo $table;
+                $this->table .= "<tr><td> $i </td>";
+                // echo $table;  
+                foreach($col_index as $key =>$index)
+                {
+                    // array_push($str, $data[$index]);
+                $row .= "$data[$index];";
+                    $this->table .= "<td>$data[$index]</td>";
+                }
+
+                if($this->validStringLength($row)){
+                    //  echo $this->validStringLength($row);
+                continue;
+                }
+                else{
+                    //echo $row ."\n";            
+                $str .= $row;
                 $str .= "\n";
                 $this->table .= "</tr>";
-          }
+                }
+            }
+            $this->putCsvFile($col,$str);
         }
-        $this->putCsvFile($col,$str);
+        $str = ''; 
+    }
+    // this function call when uploaded file is HM.csv or HM2.csv
+    function hm_and_hm2(){
+        $i=0; $str = '';
+        $this->table_header = "
+                                <th>Name 1</th>
+                                <th>Name 2</th>
+                                <th>Name 3</th>
+                                <th>Name 4</th>
+                                <th>Name 4</th>
+                                <th>Name 6</th>
+                                <th>DOB</th>
+                                <th>Nationality</th>";
+        $col = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6','DOB','Nationality');    
 
-        }
+            if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
+        //     // return header in row 2;
+            $header_arr = $this->return_header();
+        //     //get indexes of column
+            $col_index = $this->getIndex($header_arr, $col);
+
+            while($data = fgetcsv($handle, 10000, ","))
+            {
+                $i++;
+                if($i>2)
+                {   $row = '';
+                    $this->table .= "<tr><td> $i </td>";
+                    foreach($col_index as $key =>$index)
+                    {
+                        $row .= "$data[$index];";
+                        $this->table .= "<td>$data[$index]</td>";
+                    }
+                    if($this->validStringLength($row)){
+                        //echo 'arabic';
+                        continue;
+                    }
+                    else{
+                    
+                        $str .= $row;
+                        $str .= "\n";
+                        $this->table .= "</tr>";
+                    }
+                }
+            }
+           $this->putCsvFile($col,$str);
+
+         }
         $str = '';
 
     }
-// this function call when uploaded file is HM.csv or HM2.csv
-function ofac(){
-    $i=0; $str = '';
-    $this->table_header = "<th>No</th>
-                        <th>ent_num</th>
-                        <th>SDN_Name</th>
-                        <th>SDN_TYPE</th>
-                        <th>Program</th>
-                        <th>Date of birth</th>";
-    $col = array(0,1,2,3,11);   
-    $csv_header = array("ent_num","SDN_Name","SDN_TYPE","Program","DOB");
-    if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
-        //get indexes of column
-        $col_index = $col;          
-        while($data = fgetcsv($handle, 10000, ",")){
+//     // this function call when uploaded file is ofac.csv or HM2.csv
+    function ofac()
+    {
+        $i=0; $str = '';
+        $this->table_header = "
+                            <th>SDN_Name</th>
+                            <th>Date of birth</th>
+                            <th>nationality</th>";
+        $col = array(1,11);   
+        $csv_header = array("SDN_Name","DOB","nationality");
+            //get indexes of column
+            $col_index = $col;   
+            if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
+                //get indexes of column
+                $col_index = $col; 
+                while($data = fgetcsv($handle, 10000, ","))
+                {
             
-                $i++; $x ='';
-                // if(!isset($data[$i]))
-                $this->table .= "<tr><td> $i </td>";
-                foreach($col_index as $index)
-                    {
-                    $r = isset($data[$index]) ? $data[$index] : null;
-                     $x .= "$r;";
-                     $this->table .= "<td>$r</td>";
-                    }
-                  if($x === ';;;;;' ){
-                  echo $x."jjjjjjjjjjjjjjjjjjjj";
-                  continue;
-                  }
-                  else{
-                  $str .= $x;
-                    $str .= "\n";
-                $this->table .= "</tr>";
-                  }
-        
-        }
-        $this->putCsvFile($csv_header,$str);
-    }
-    $str = '';
-}
-function unxml(){
-    $str = '';$designat = ''; $nationality = ''; $dob = ''; $docType = ''; $docNum = '';$lUpd = '';
-    $csv_header = array('Data Id','First Name','Second Name','List Type','DOB','Nationality','Designation','Type Of DOc','Don Number','Last Updated');
-        $xml = simplexml_load_file('san-output.xml');
-        for( $xml->rewind(); $xml->valid(); $xml->next() ) 
-        {
-            if($xml->hasChildren()) {
-                foreach($xml->current() as $key=>$j)
-                { 
-                    // print_r($key);
-                    foreach($j->DESIGNATION as $designaion)
-                    {
-                        $designat = $designaion->VALUE;
-                        // print_r($designat);
-                    }
-                    foreach($j->NATIONALITY as $nat)
-                    {
-                        $nationality = "$nat->VALUE";
-                    }
-                    foreach($j->INDIVIDUAL_DATE_OF_BIRTH as $dob)
-                    {
-                        $dob = "$dob->DATE";
-                    }
-                    foreach($j->INDIVIDUAL_DOCUMENT as $doc)
-                    {
-                        $docType = $doc->TYPE_OF_DOCUMENT;
-                        $docNum = "$doc->NUMBER";
-                    }
-                    foreach($j->LAST_DAY_UPDATED as $lastUpd)
-                    {
-                        $lUpd = "$lastUpd->VALUE";
-                        
-                    }
-                    $str .= "$j->DATAID;$j->FIRST_NAME;$j->SECOND_NAME;$dob;$j->UN_LIST_TYPE;$nationality;$designat;$docType;$docNum;$lUpd|";
-                    // $str .= "\n";
-                //    echo $str;
+                    $i++; $row ='';
+                    // if(!isset($data[$i]))
+                    $this->table .= "<tr><td> $i </td>";
+                    foreach($col_index as $index)
+                        {
+                            if($index == 11 && isset($data[$index]))
+                            {
+        //                         //echo $data[$index]."<br>";
+                                $r = explode(";", $data[$index]);    
+                                if(count($r) >= 1)
+                                {
+                                    foreach($r as $nationalityAndDOB){
+        //                             // echo $nationalityAndDOB."<br>";
+                                        if(strpos($nationalityAndDOB, 'DOB') !== false){
+                                            $dob = strstr($nationalityAndDOB ,'DOB'); 
+                                            $row .= $dob;
+                                            continue;
+                                        }
+
+                                        if(strpos($nationalityAndDOB, 'nationality') !== false)
+                                        {
+                                            $nat = strstr($nationalityAndDOB, 'nationality');
+                                            $nat = str_replace('nationality', '', $nat); 
+                                            $row .= "$nat";
+                                                        
+                                        }
+                                        $row .= ';';
+                                        // echo $row."<br>";
+
+                                    }
+                               }
+                                }
+        //                     // if index not DOB
+                            if($index == 1 && isset($data[$index]))
+                            {
+                                $r = $data[$index];
+                                $row .= "$r;";
+                                $this->table .= "<td>$r</td>";
+                            }
+                        }
                     
-                }
-            }   
-     
-        }
-        // print_r($str);
-        $this->putXmlCsvFile($csv_header,$str);
-}
+                    
+                        if($this->validStringLength($row))
+                        {
+                            //echo 'arabic';
+                            continue;
+                        }
+                        else{
+                            $str .= $row;
+                            $str .= "\n";
+                            $this->table .= "</tr>";
+                        }
+             }
+                $this->putCsvFile($csv_header,$str);
+           }   
+         $str = ''; 
+    }    
+            
 
-// return  array index of colums
-function getIndex($data , $col){
-    $indexes = array();
-    foreach($data  as $index=> $value){
-        if(in_array($value , $col)){
-            array_push($indexes , $index );
-        }
-        else continue;
+    function unxml(){
+        $str = ''; $nationality = ''; $dob = '';
+        $csv_header = array('First Name','Second Name','DOB','Nationality');
+            $xml = simplexml_load_file('san-output.xml') or die("Error: Cannot create object");
+        
+                foreach ($xml as $parent=> $x){
+
+                    foreach($x as $key=>$j)
+                    { 
+                       
+                        foreach($j->NATIONALITY as $nat)
+                        {
+                            $nationality = "$nat->VALUE";
+                        }
+                        foreach($j->INDIVIDUAL_DATE_OF_BIRTH as $dob)
+                        {
+                            $dob = "$dob->DATE";
+                        }
+                        
+                        $str .= "$j->FIRST_NAME;$j->SECOND_NAME;$dob;$nationality|";
+                      
+                    }
+               }   
+        
+           // }
+            // print_r($str);
+            $this->putXmlCsvFile($csv_header,$str);
     }
-    return $indexes;
-}
-function return_header(){
-    $i = 0; $header =  array();
-    if (($handle = fopen("san-output.csv", "r")) !== FALSE) {  
-        while($data = fgetcsv($handle, 10000, ",")){
-            if($i == 0){
-                $i++;
-                continue;
+
+     // return  array index of colums
+    function getIndex($data , $col){
+        $indexes = array();
+        foreach($data  as $index=> $value){
+            if(in_array($value , $col)){
+                array_push($indexes , $index );
             }
-            else
-                if($i == 1){
-                    $header = $data;
-                    $i++;
-                    break;
-                }
-            else break;
+            else continue;
         }
-        return $header;
+        return $indexes;
+    }
+    function return_header(){
+        $i = 0; $header =  array();
+        if (($handle = fopen("san-output.csv", "r")) !== FALSE) {  
+            while($data = fgetcsv($handle, 10000, ",")){
+                if($i == 0){
+                    $i++;
+                    continue;
+                }
+                else
+                    if($i == 1){
+                        $header = $data;
+                        $i++;
+                        break;
+                    }
+                else break;
+            }
+            return $header;
+        }
+
+    }
+    function putCsvFile($header , $lines)
+    {
+        //print_r($lines);
+        $f = fopen($this->output_san, 'w');
+        fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+        fputcsv($f , $header , ';');
+        $rows = explode("\n",$lines);
+        foreach($rows as  $row){
+    
+        $d1 = explode(";",$row);
+
+        fputcsv($f, $d1 , ';','"');
+        }
+        fclose($f);
+        $processComplete = 'complete';
+
+    }
+    function putXmlCsvFile($header , $lines)
+    {
+        //print_r($lines);
+        $f = fopen($this->output_san, 'w');
+        fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+        fputcsv($f , $header , ';');
+        $rows = explode("|",$lines);
+        foreach($rows as  $row){
+        $d1 = explode(";",$row);
+        fputcsv($f, $d1 , ';');
+        }
+        fclose($f);
+        $processComplete = 'complete';
+
     }
 
-}
-function putCsvFile($header , $lines)
-{
-    //print_r($lines);
-    $f = fopen($this->output_san, 'w');
-    fputcsv($f , $header);
-    $rows = explode("\n",$lines);
-    foreach($rows as  $row){
-   
-     $d1 = explode(";",$row);
-    fputcsv($f, $d1 , ';','"');
+    function downloadCSV(){
+        if (file_exists($this->output_san)) {
+            header('Content-Encoding: UTF-8');
+            header('Content-type: text/csv; charset=UTF-8');
+            header('Content-Disposition: attachment; filename="'.basename($this->output_san).'"');
+            echo "\xEF\xBB\xBF"; // UTF-8 BOM
+            header("Pragma: no-cache");
+            // header('Content-Description: File Transfer');
+            // header('Content-Type: application/octet-stream');
+            // header('Expires: 0');
+            // header('Cache-Control: must-revalidate');
+            // header('Pragma: public');
+            header('Content-Length: ' . filesize($this->output_san));
+            readfile($this->output_san);
+        }
     }
-    fclose($f);
-    $processComplete = 'complete';
+//     // chekc if string has arabic text
+//     function hasArabic($str){
+//         // if(strlen('EU.39.56') != mb_strlen('EU.39.56', 'utf-8'))
+//         // echo 'not english';
+//         // else echo'english';
+//     // if (preg_match('/[اأإء-ي]/ui', $str) || !preg_match('/[^a-zA-Z\d]/', $str) ) {
+//         if(strlen($str) != mb_strlen($str, 'utf-8'))
+//         {
+//             $rows = explode(";",$str);
+//             echo $str."</br>";
+//             return true;
+//         } else {
+//             return false;
+//         }
+//     }
+    function validStringLength($str){
+        $k = str_replace(array("#", ";"), '', $str);
+        //  echo strlen($k)."\n";
+        $length = strlen($k);
+        // echo gettype($length);
+        if($length < 2 || $length == 0 ){
+        return true;
+        }
+        else return false;
 
-}
-function putXmlCsvFile($header , $lines)
-{
-    //print_r($lines);
-    $f = fopen($this->output_san, 'w');
-    fputcsv($f , $header , ',');
-    $rows = explode("|",$lines);
-    foreach($rows as  $row){
-     $d1 = explode(";",$row);
-    fputcsv($f, $d1 , ';');
     }
-    fclose($f);
-    $processComplete = 'complete';
 
-}
-
-function downloadCSV(){
-    if (file_exists($this->output_san)) {
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="'.basename($this->output_san).'"');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($this->output_san));
-        readfile($this->output_san);
-}
-}
 }//end class 
 
 ?>
