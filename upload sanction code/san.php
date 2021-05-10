@@ -74,42 +74,34 @@ class Sanction {
                                 <th>BirthDate_Year</th>";
         $col = array('NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','BirthDate_BirthDate','BirthDate_Day','BirthDate_Month','BirthDate_Year');
 
-        $nameArr= array('NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName');
         if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
             $data = fgetcsv($handle, 10000, ";");
             // print_r($data);
             $col_index =  $this->getIndex($data , $col);
-            $name_col =  $this->getIndex($data , $nameArr);
-            // print_r($name_col);
-            // print_r($col_index);
-
+            //print_r($col_index);
             while($data = fgetcsv($handle, 10000, ";")){
                 $i++;
                 // echo $table;
-                if($this->IsEmptyName($data ,$name_col)!= true){
-
-                    $this->table .= "<tr><td> $i </td>";
-                    // echo $table;  
-                    $row ='';
-                    foreach($col_index as $key =>$index)
-                    {
-                        
-                        // array_push($str, $data[$index]);
-                    $row .= "$data[$index];";
-                        $this->table .= "<td>$data[$index]</td>";
-                    }
-                    //check if not empty row
-                    if($this->validStringLength($row))
-                        {
-                        continue;
-                        }
-                    else{
-                        $str .= $row;
-                        $str .= "\n";
-                        $this->table .= "</tr>";
-                    }
-                }//end if 
-            }// end while
+                $this->table .= "<tr><td> $i </td>";
+                // echo $table;  
+                $row ='';
+                foreach($col_index as $key =>$index)
+                {
+                    // array_push($str, $data[$index]);
+                $row .= "$data[$index];";
+                    $this->table .= "<td>$data[$index]</td>";
+                }
+                //check if not empty row
+                if($this->validStringLength($row))
+                {
+                continue;
+                }
+                else{
+                    $str .= $row;
+                    $str .= "\n";
+                    $this->table .= "</tr>";
+                }
+            }
             $this->putCsvFile($col,$str);
         }
         $str = ''; 
@@ -120,26 +112,22 @@ class Sanction {
         $i=0; 
         $str = '';
         $this->table_header = "<th>No</th><th>NameAlias_FirstName</th><th>NameAlias_LastName</th><th>BirthDate_BirthDate</th><th>NameAlias_Function</th><th>Identification_TypeDescription</th><th>Identification_Number</th>";
-        $col = array('NameAlias_FirstName','NameAlias_LastName','BirthDate_BirthDate');
+        $col = array('NameAlias_FirstName','NameAlias_LastName','BirthDate_BirthDate','NameAlias_Function','Identification_TypeDescription','Identification_Number');
 
-        $nameArr = array('NameAlias_FirstName','NameAlias_LastName');
         if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
             $data = fgetcsv($handle, 10000, ";");
             // print_r($data);
             $col_index =  $this->getIndex($data , $col);
-            $name_col =  $this->getIndex($data , $nameArr);
-
             //print_r($col_index);
             while($data = fgetcsv($handle, 10000, ";")){
                 $i++; $row = '';
-                if($this->IsEmptyName($data ,$name_col != true)){
                 // echo $table;
                 $this->table .= "<tr><td> $i </td>";
                 // echo $table;  
                 foreach($col_index as $key =>$index)
                 {
                     // array_push($str, $data[$index]);
-                    $row .= "$data[$index];";
+                $row .= "$data[$index];";
                     $this->table .= "<td>$data[$index]</td>";
                 }
 
@@ -149,12 +137,11 @@ class Sanction {
                 }
                 else{
                     //echo $row ."\n";            
-                    $str .= $row;
-                    $str .= "\n";
-                    $this->table .= "</tr>";
+                $str .= $row;
+                $str .= "\n";
+                $this->table .= "</tr>";
                 }
-            } //end  if name not empty
-            }// end while
+            }
             $this->putCsvFile($col,$str);
         }
         $str = ''; 
@@ -171,27 +158,20 @@ class Sanction {
                                 <th>Name 6</th>
                                 <th>DOB</th>
                                 <th>Nationality</th>";
-        $col = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6','DOB','Nationality');   
-        $nameArr = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6'); 
+        $col = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6','DOB','Nationality');    
 
             if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
         //     // return header in row 2;
             $header_arr = $this->return_header();
         //     //get indexes of column
             $col_index = $this->getIndex($header_arr, $col);
-            $name_col =  $this->getIndex($col , $nameArr);
-
 
             while($data = fgetcsv($handle, 10000, ","))
             {
-               
-
                 $i++;
-                if($i>2 && $this->IsEmptyName($data , $name_col) != true)
+                if($i>2)
                 {   $row = '';
                     $this->table .= "<tr><td> $i </td>";
-                  
-
                     foreach($col_index as $key =>$index)
                     {
                         $row .= "$data[$index];";
@@ -425,17 +405,6 @@ class Sanction {
         return true;
         }
         else return false;
-
-    }
-    // function to check if row has empty name
-    function IsEmptyName($data , $index){
-        $name = '';
-        foreach($index as $i){
-            $name .= $data[$i];
-        }
-        // echo $name.'<br>';
-        // echo strlen($name).'<br>';
-        return strlen($name) == 0? true : false;
 
     }
 
