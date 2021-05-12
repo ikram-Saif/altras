@@ -72,36 +72,56 @@ class Sanction {
                                 <th>BirthDate_Day</th>
                                 <th>BirthDate_Month</th>
                                 <th>BirthDate_Year</th>";
-        $col = array('NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','BirthDate_BirthDate','BirthDate_Day','BirthDate_Month','BirthDate_Year');
+        $col = array('Entity_LogicalId','NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','BirthDate_BirthDate','BirthDate_Day','BirthDate_Month','BirthDate_Year');
 
+        $nameArr= array('NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName');
         if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
             $data = fgetcsv($handle, 10000, ";");
-            // print_r($data);
+            // echo'<pre>';
+            //  print_r($data);
+            //  echo'<pre>';
             $col_index =  $this->getIndex($data , $col);
-            //print_r($col_index);
+            $name_col =  $this->getIndex($data , $nameArr);
+            // print_r($name_col);
+             print_r($col_index);
+
             while($data = fgetcsv($handle, 10000, ";")){
-                $i++;
+                $i++; $row ='';
+                // echo '<pre>';
+                // print_r($data);
+                // echo '</pre>';
                 // echo $table;
-                $this->table .= "<tr><td> $i </td>";
-                // echo $table;  
-                $row ='';
-                foreach($col_index as $key =>$index)
-                {
-                    // array_push($str, $data[$index]);
-                $row .= "$data[$index];";
-                    $this->table .= "<td>$data[$index]</td>";
+                  if($this->IsEmptyName($data ,$name_col)!= true){
+
+                    $this->table .= "<tr><td> $i </td>";
+                    // echo $table;  
+                   
+                    foreach($col_index as $key =>$index)
+                    {
+                        // array_push($str, $data[$index]);
+                        $row .= $this->checkDoubleQoute($data[$index]);
+                        
+                        $this->table .= "<td>$data[$index]</td>";
+                        $row .= ';';
+                    
+                    }
+                    //check if not empty row
+                    if($this->validStringLength($row))
+                        {
+                        continue;
+                        }
+                    else{
+                        $str .= $row;
+                        $str .= "\n";
+                        $this->table .= "</tr>";
+                    }
+                }//end if
+                else {
+                    continue;
                 }
-                //check if not empty row
-                if($this->validStringLength($row))
-                {
-                continue;
-                }
-                else{
-                    $str .= $row;
-                    $str .= "\n";
-                    $this->table .= "</tr>";
-                }
-            }
+            }// end while
+            // $str = $this->filterById($str);
+
             $this->putCsvFile($col,$str);
         }
         $str = ''; 
@@ -111,24 +131,30 @@ class Sanction {
     {
         $i=0; 
         $str = '';
-        $this->table_header = "<th>No</th><th>NameAlias_FirstName</th><th>NameAlias_LastName</th><th>BirthDate_BirthDate</th><th>NameAlias_Function</th><th>Identification_TypeDescription</th><th>Identification_Number</th>";
-        $col = array('NameAlias_FirstName','NameAlias_LastName','BirthDate_BirthDate','NameAlias_Function','Identification_TypeDescription','Identification_Number');
+        $this->table_header = "<th>No</th><th>NameAlias_FirstName</th><th>NameAlias_LastName</th><th>BirthDate_BirthDate</th>";
+        $col = array('Entity_LogicalId','NameAlias_FirstName','NameAlias_LastName','BirthDate_BirthDate');
 
+        $nameArr = array('NameAlias_FirstName','NameAlias_LastName');
         if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
             $data = fgetcsv($handle, 10000, ";");
             // print_r($data);
             $col_index =  $this->getIndex($data , $col);
+            $name_col =  $this->getIndex($data , $nameArr);
+
             //print_r($col_index);
             while($data = fgetcsv($handle, 10000, ";")){
                 $i++; $row = '';
+                if($this->IsEmptyName($data ,$name_col != true)){
                 // echo $table;
                 $this->table .= "<tr><td> $i </td>";
                 // echo $table;  
                 foreach($col_index as $key =>$index)
                 {
                     // array_push($str, $data[$index]);
-                $row .= "$data[$index];";
+                    $row .= $this->checkDoubleQoute($data[$index]);
                     $this->table .= "<td>$data[$index]</td>";
+                    $row .= ';';
+
                 }
 
                 if($this->validStringLength($row)){
@@ -137,11 +163,12 @@ class Sanction {
                 }
                 else{
                     //echo $row ."\n";            
-                $str .= $row;
-                $str .= "\n";
-                $this->table .= "</tr>";
+                    $str .= $row;
+                    $str .= "\n";
+                    $this->table .= "</tr>";
                 }
-            }
+            } //end  if name not empty
+            }// end while
             $this->putCsvFile($col,$str);
         }
         $str = ''; 
@@ -158,24 +185,33 @@ class Sanction {
                                 <th>Name 6</th>
                                 <th>DOB</th>
                                 <th>Nationality</th>";
-        $col = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6','DOB','Nationality');    
+        $col = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6','DOB','Nationality');   
+        $nameArr = array('Name 1','Name 2','Name 3','Name 4','Name 5','Name 6'); 
 
             if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
         //     // return header in row 2;
             $header_arr = $this->return_header();
         //     //get indexes of column
             $col_index = $this->getIndex($header_arr, $col);
+            $name_col =  $this->getIndex($col , $nameArr);
+
 
             while($data = fgetcsv($handle, 10000, ","))
             {
-                $i++;
-                if($i>2)
-                {   $row = '';
+               
+
+                $i++;$row = '';
+                if($i>2 && $this->IsEmptyName($data , $name_col) != true)
+                {   
                     $this->table .= "<tr><td> $i </td>";
+                  
+
                     foreach($col_index as $key =>$index)
                     {
-                        $row .= "$data[$index];";
+                        $row .= $this->checkDoubleQoute($data[$index]);
                         $this->table .= "<td>$data[$index]</td>";
+                        $row .= ';';
+
                     }
                     if($this->validStringLength($row)){
                         //echo 'arabic';
@@ -266,6 +302,7 @@ class Sanction {
                             $this->table .= "</tr>";
                         }
              }
+            //  $str = $this->filterById($str);
                 $this->putCsvFile($csv_header,$str);
            }   
          $str = ''; 
@@ -284,14 +321,14 @@ class Sanction {
                        
                         foreach($j->NATIONALITY as $nat)
                         {
-                            $nationality = "$nat->VALUE";
+                            $nationality = "\"$nat->VALUE\"";
                         }
                         foreach($j->INDIVIDUAL_DATE_OF_BIRTH as $dob)
                         {
-                            $dob = "$dob->DATE";
+                            $dob = "\"$dob->DATE\"";
                         }
                         
-                        $str .= "$j->FIRST_NAME;$j->SECOND_NAME;$dob;$nationality|";
+                        $str .= "\"$j->FIRST_NAME\";\"$j->SECOND_NAME\";$dob;$nationality|";
                       
                     }
                }   
@@ -335,25 +372,39 @@ class Sanction {
     function putCsvFile($header , $lines)
     {
         //print_r($lines);
+        $result = array();
         $f = fopen($this->output_san, 'w');
-        fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+        // fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
         fputcsv($f , $header , ';');
         $rows = explode("\n",$lines);
         foreach($rows as  $row){
-    
+            
+        //  echo $row.'<br>';
+         //$row = str_replace('"','',$row);
+        // echo $row.'<br>';
         $d1 = explode(";",$row);
 
-        fputcsv($f, $d1 , ';','"');
+
+        fputcsv($f,$d1,';',chr(0));
         }
         fclose($f);
         $processComplete = 'complete';
 
     }
+    // function removeQouatte($d1){
+    //     $result = array();
+    //     foreach($d1 as $d){
+    //         // $w = substr($d, 0, -2);
+    //         // $w = substr($d, 2);
+    //         array_push($result, $d);
+    //      }
+    //      return $result;
+    // }
     function putXmlCsvFile($header , $lines)
     {
         //print_r($lines);
         $f = fopen($this->output_san, 'w');
-        fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+        // fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
         fputcsv($f , $header , ';');
         $rows = explode("|",$lines);
         foreach($rows as  $row){
@@ -369,7 +420,7 @@ class Sanction {
         if (file_exists($this->output_san)) {
             header('Content-Encoding: UTF-8');
             header('Content-type: text/csv; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="'.basename($this->output_san).'"');
+            header("Content-Disposition: attachment; filename=$this->output_san");
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             header("Pragma: no-cache");
             // header('Content-Description: File Transfer');
@@ -406,6 +457,69 @@ class Sanction {
         }
         else return false;
 
+    }
+    // function to check if row has empty name
+    function IsEmptyName($data , $index){
+        $name = '';
+        foreach($index as $i){
+            $name .= $data[$i];
+        }
+        // echo $name.'<br>';
+        // echo strlen($name).'<br>';
+        return strlen($name) == 0? true : false;
+
+    }
+    // check if field has Double qoute
+    function checkDoubleQoute($string){
+        // $string = "\"$string\"";
+        $s = '';
+            // string has a  double qoute
+            // if(preg_match('/^(["\"]).*\1$/m', $string)){   
+            //     $string = str_replace('"','',$string); 
+            //     $string = $string;
+            // }
+            // //string hasnot qoute or started with qoute and ended with qoute;
+            // else{
+            $string = str_replace('"','',$string);
+             $string = "\"".$string."\"";
+            // }
+            return $string;
+        }
+    function filterById($str){
+        $idArr = array();
+        $lines = explode("\n",$str);
+        foreach($lines as $line){
+            $line = explode(';', $line);
+            array_push($idArr,$line[0]);
+        }
+        $goupedID = array_count_values($idArr);
+        $arr = array();
+        foreach($lines as $key=>$line){
+             $f = explode(';', $line);
+            $val = $goupedID[$f[0]];
+            $dob =array();
+            for($i=0 ; $i< $val;$i++){
+                  $f1 = explode(';', $lines[$key +$i]);
+                  array_merge($dob,$f1);
+                
+                }
+                echo'<pre>';
+                print_r($dob);
+                echo'</pre>';
+                
+                $arr = call_user_func_array('array_merge', $dob);
+            //    array_push($arr , $dob);
+                // echo'<pre>';
+                // print_r($arr);
+                // echo'</pre>';
+
+            }
+            // echo'<pre>';
+            // print_r($arr);
+            // echo'</pre>';
+
+
+        return $dob;
     }
 
 }//end class 
