@@ -68,18 +68,13 @@ class Sanction {
                                 <th>NameAlias_FirstName</th>
                                 <th>NameAlias_MiddleName</th>
                                 <th>NameAlias_WholeName</th>
-                                <th>BirthDate_BirthDate</th>
-                                <th>BirthDate_Day</th>
-                                <th>BirthDate_Month</th>
-                                <th>BirthDate_Year</th>";
-        $col = array('Entity_LogicalId','NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','BirthDate_BirthDate','BirthDate_Day','BirthDate_Month','BirthDate_Year');
+                                <th>BirthDate_BirthDate</th>";
+        $col = array('Entity_LogicalId','NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName','BirthDate_BirthDate');
 
         $nameArr= array('NameAlias_LastName','NameAlias_FirstName','NameAlias_MiddleName','NameAlias_WholeName');
         if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
             $data = fgetcsv($handle, 10000, ";");
-            // echo'<pre>';
-            //  print_r($data);
-            //  echo'<pre>';
+      
             $col_index =  $this->getIndex($data , $col);
             $name_col =  $this->getIndex($data , $nameArr);
             // print_r($name_col);
@@ -87,10 +82,6 @@ class Sanction {
 
             while($data = fgetcsv($handle, 10000, ";")){
                 $i++; $row ='';
-                // echo '<pre>';
-                // print_r($data);
-                // echo '</pre>';
-                // echo $table;
                   if($this->IsEmptyName($data ,$name_col)!= true){
 
                     $this->table .= "<tr><td> $i </td>";
@@ -236,11 +227,12 @@ class Sanction {
     {
         $i=0; $str = '';
         $this->table_header = "
-                            <th>SDN_Name</th>
+                            <th>first_Name</th>
+                            <th>last_Name</th>
                             <th>Date of birth</th>
                             <th>nationality</th>";
         $col = array(1,11);   
-        $csv_header = array("SDN_Name","DOB","nationality");
+        $csv_header = array("first_Name","last_Name","DOB","nationality");
             //get indexes of column
             $col_index = $col;   
             if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
@@ -267,12 +259,12 @@ class Sanction {
                            // if index not DOB
                             if($index == 1 && isset($data[$index]))
                             {
-                                $r = strlen($data[$index]) >0? $data[$index] : "\"\"";
+                                ;
 
-                                $row .= $this->checkDoubleQoute($r);
+                                $row .= $this->getNames($data[$index]);
                                 $row .= ';';
                                 
-                                $this->table .= "<td>$r</td>";
+                                // $this->table .= "<td>$r</td>";
                             }
 
 
@@ -370,8 +362,6 @@ class Sanction {
          // remove last semicolumn in line   
         $row = rtrim($row, "; ");
         $d1 = explode(";",$row);
-        $x =  count($d1);
-        echo $x.'<br>';
         fputcsv($f,$d1,';',' ');
         }
         fclose($f);
@@ -503,6 +493,21 @@ function get_nat($arr){
     else $nat = "\"\"";
     return $nat;
  
+ }
+ // this function separate first and last Ex: fname,lname its return firstName;lastName , or "";""
+ function getNames($name){
+     $fname = '';$lname = '';
+     $nameArr = explode(',',$name);
+
+     if(count($nameArr) > 0){
+         $fname = isset($nameArr[1])?"\"$nameArr[1]\"":"\"\""; 
+         $lname = isset($nameArr[0])?"\"$nameArr[0]\"":"\"\"";  
+     }
+     else {
+        $fname =isset($nameArr[0])?"\"$nameArr[0]\"":"\"\""; 
+        $lname = "\"\""; 
+     }
+        return "$fname;$lname";
  }
 
 }//end class 
