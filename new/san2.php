@@ -367,41 +367,17 @@ class Sanction {
         fputcsv($f , $header , ';');
         $rows = explode("\n",$lines);
         foreach($rows as  $row){
-            
-        //  echo $row.'<br>';
-        // $row = str_replace('"','',$row);
-        // echo $row.'<br>';
-        $a = array();
+         // remove last semicolumn in line   
+        $row = rtrim($row, "; ");
         $d1 = explode(";",$row);
-        // print_r($d1);
-//          foreach ($d1 as $key=>$d)
-//             {
-//                 if($key < count($d1))
-//                 {
-//                     if(!isset($d)|| strlen($d) == 0)
-//                        { array_push($a , "\"".$d."\"");
-//                         echo $a[$key];}
-//                     else
-//                         array_push($a , $d);
-// }
-
-//             }
-
+        $x =  count($d1);
+        echo $x.'<br>';
         fputcsv($f,$d1,';',' ');
         }
         fclose($f);
         $processComplete = 'complete';
 
     }
-    // function removeQouatte($d1){
-    //     $result = array();
-    //     foreach($d1 as $d){
-    //         // $w = substr($d, 0, -2);
-    //         // $w = substr($d, 2);
-    //         array_push($result, $d);
-    //      }
-    //      return $result;
-    // }
     function putXmlCsvFile($header , $lines)
     {
         //print_r($lines);
