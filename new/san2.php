@@ -50,6 +50,7 @@ $obj = new Sanction();
      else $obj->message = "choose file to upload";
 
  }
+
  if($up==1){$dsbl = "";}else{$dsbl = "disabled";}
  if(isset($_POST['download'])){
      $obj->downloadCSV();
@@ -61,6 +62,8 @@ class Sanction {
   // this function call when uploaded file is EU.csv or EU sanction.csv
     function eu()
     {
+
+
         $i=0; 
         $str = '';
         $this->table_header = "<th>No</th>
@@ -76,47 +79,73 @@ class Sanction {
             $data = fgetcsv($handle, 10000, ";");
       
             $col_index =  $this->getIndex($data , $col);
+            // to check all name is empty or not
             $name_col =  $this->getIndex($data , $nameArr);
             // print_r($name_col);
-             print_r($col_index);
+            //  print_r($col_index);
+            // print each id with string of date of birth
+            // $idArr = $this->dob_for_eachID($data); 
 
             while($data = fgetcsv($handle, 10000, ";")){
                 $i++; $row ='';
-                  if($this->IsEmptyName($data ,$name_col)!= true){
+                //   if($this->IsEmptyName($data ,$name_col)!= true){
 
                     $this->table .= "<tr><td> $i </td>";
                     // echo $table;  
+
                    
                     foreach($col_index as $key =>$index)
                     {
+                        $cid =  $data[1];
                         // array_push($str, $data[$index]);
                         $row .= $this->checkDoubleQoute($data[$index]);
                         
                         $this->table .= "<td>$data[$index]</td>";
                         $row .= ';';
+                        
+                        $dob = $data[54];
+                        $cl_dob[$cid][] = "$dob";
+                       $client_ar[$cid][$index][] = $data[$index];
+
                     
-                    }
+                    } 
                     //check if not empty row
-                    if($this->validStringLength($row))
-                        {
-                        continue;
-                        }
-                    else{
+                    // if($this->validStringLength($row))
+                    //     {
+                    //     continue;
+                    //     }
+                    // else{
                         $str .= $row;
                         $str .= "\n";
                         $this->table .= "</tr>";
-                    }
-                }//end if
-                else {
-                    continue;
-                }
+                   // }
+              //}//end if all name is empty 
+                // when all name is empty get the next row 
+                // else {
+                //     continue;
+                // }
             }// end while
-            // $str = $this->filterById($str);
+
+            $str = $this->get_keys_arr($str);
+           // $str = $this->filterById($str);
+
 
             $this->putCsvFile($col,$str);
         }
+        /**************** */
         $str = ''; 
+        foreach($client_ar as $cid => $ar1 ){
+            $fn = $client_ar[$cid][16][0];
+            $ln = $client_ar[$cid][17][0];
+            $mn = $client_ar[$cid][18][0];
+            $whn = $client_ar[$cid][19][0];
+            $dob = implode(" ",$cl_dob[$cid]);
+            // echo "$cid | $fn |$ln |$mn |$whn |$dob <br>";
+        }
+
     } 
+
+
     // this function call when uploaded file is EU.csv or EU sanction.csv or un.csv
     function un()
     {
@@ -391,13 +420,10 @@ class Sanction {
             header("Content-Disposition: attachment; filename=$this->output_san");
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             header("Pragma: no-cache");
-            // header('Content-Description: File Transfer');
-            // header('Content-Type: application/octet-stream');
-            // header('Expires: 0');
-            // header('Cache-Control: must-revalidate');
-            // header('Pragma: public');
+            
             header('Content-Length: ' . filesize($this->output_san));
             readfile($this->output_san);
+            exit;
         }
     }
 
@@ -426,44 +452,57 @@ class Sanction {
     // check if field has Double qoute
     function checkDoubleQoute($string){    
         $string = str_replace('"','',$string);
+
         $string = "\"".$string."\"";
         return $string;
     }
     function filterById($str){
         $idArr = array();
         $lines = explode("\n",$str);
+        $l = array();
         foreach($lines as $line){
-            $line = explode(';', $line);
+            $line =  explode(';', $line);
             array_push($idArr,$line[0]);
+
+            array_push($l,$line);
         }
         $goupedID = array_count_values($idArr);
         $arr = array();
-        foreach($lines as $key=>$line){
-             $f = explode(';', $line);
-            $val = $goupedID[$f[0]];
-            $dob =array();
-            for($i=0 ; $i< $val;$i++){
-                  $f1 = explode(';', $lines[$key +$i]);
-                  array_merge($dob,$f1);
+        $result = array();
+        foreach ($l as $element) {
+            $result[$element[0]][] = $element;
+}
+    $emptyNameArr = array();
+        foreach($result as $key=>$n){
+
+
+        }
+        
+            // echo $val.'<br>';
+            // $dob =array();
+            // for($i=0 ; $i< $val;$i++){
+            //       $f1 = explode(';', $lines[$key +$i]);
+            //       array_merge($dob,$f1);
                 
-                }
-                echo'<pre>';
-                print_r($dob);
-                echo'</pre>';
+            //     }
                 
-                $arr = call_user_func_array('array_merge', $dob);
+            //     $arr = call_user_func_array('array_merge', $dob);
             //    array_push($arr , $dob);
                 // echo'<pre>';
-                // print_r($arr);
+                // print_r($f);
                 // echo'</pre>';
 
-            }
+            //}
             // echo'<pre>';
-            // print_r($arr);
+            //     print_r($goupedID);
+            //     echo'</pre>';
+                
+            // echo'<pre>';
+            // print_r($result);
             // echo'</pre>';
 
 
-        return $dob;
+       // return $dob;
     }
 //function to return DOB filter array contain dob and return all dob in string
 function get_dob($arr){
@@ -510,7 +549,95 @@ function get_nat($arr){
         return "$fname;$lname";
  }
 
+function dob_for_eachID($data){
+    
+   
+$goupedID  = $this->get_keys_arr();
+// $i=1;
+//     if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
+
+//      while($data = fgetcsv($handle, 10000, ";")){
+//         //  echo $data[1];
+//         //  $data = explode(';',$data)
+//         //  print_r($data); 
+//         // $key = array_search($data[1],$goupedID,true);
+//            // echo $key;
+//     if(isset($data[1])){
+//       if($data[1] == $goupedID[$i] )
+//         // {$goupedID[$i] = $data[45];
+//         echo $goupedID[$i].'<br>';
+//     //}
+//         else 
+//         $i++;
+//     }else break;
+
+  //}
+//}
+    
+    // echo'<pre>';
+    // print_r($goupedID);
+    // echo '<pre>';
+    
+}
+function get_keys_arr($str){
+    $idArr = array();$i = 1;
+    $id ; $dob;
+    if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
+        while($data = fgetcsv($handle, 10000, ";")){
+           
+           array_push($idArr , $data[1]);
+        }
+    }
+    $goupedID = array_count_values($idArr);
+    $goupedID = array_keys($goupedID);
+    array_shift($goupedID);
+    // echo '<pre>';
+    //     print_r($goupedID);
+    // echo '</pre>';
+    $dob = ''; $i =0;$row = '';
+    $lines = explode("\n",$str);
+    foreach($lines as $line){
+        $d1 = explode(";",$line);
+    //  echo'<pre>';
+    // print_r($goupedID);
+    // echo '<pre>';
+    $d1 = explode(";",$line);
+    
+// echo $d1[0].'<br>';
+$d1[0] = str_replace('"','',$d1[0]);
+      if($d1[0] == $goupedID[$i]){
+        $d1[5] = str_replace('"','',$d1[5]);
+
+            $dob .= strlen($d1[5]) != 0 ? "$d1[5],":'';
+      }
+    
+        else {
+            $d1[5] = "\"$dob\"" ; 
+            $d1 = implode(";",$d1);
+            $row .= "$d1\n";
+
+            $i++;
+
+            $dob = '';
+
+        }
+}// end foreach
+echo $row;
+
+    // echo $dob;
+    
+
+    // echo'<pre>';
+    // print_r($goupedID);
+    // echo '<pre>';
+
+    // return array_keys($goupedID);
+
+}
+ 
 }//end class 
+
+//--------------------
 
 ?>
 
