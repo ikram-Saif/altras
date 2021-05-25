@@ -81,69 +81,31 @@ class Sanction {
             $col_index =  $this->getIndex($data , $col);
             // to check all name is empty or not
             $name_col =  $this->getIndex($data , $nameArr);
-            // print_r($name_col);
-            //  print_r($col_index);
-            // print each id with string of date of birth
-            // $idArr = $this->dob_for_eachID($data); 
+            
 
             while($data = fgetcsv($handle, 10000, ";")){
                 $i++; $row ='';
-                //   if($this->IsEmptyName($data ,$name_col)!= true){
 
                     $this->table .= "<tr><td> $i </td>";
-                    // echo $table;  
-
                    
                     foreach($col_index as $key =>$index)
                     {
-                        $cid =  $data[1];
-                        // array_push($str, $data[$index]);
                         $row .= $this->checkDoubleQoute($data[$index]);
                         
                         $this->table .= "<td>$data[$index]</td>";
                         $row .= ';';
                         
-                        $dob = $data[54];
-                        $cl_dob[$cid][] = "$dob";
-                       $client_ar[$cid][$index][] = $data[$index];
-
-                    
-                    } 
-                    //check if not empty row
-                    // if($this->validStringLength($row))
-                    //     {
-                    //     continue;
-                    //     }
-                    // else{
+                    }                  
                         $str .= $row;
                         $str .= "\n";
                         $this->table .= "</tr>";
-                   // }
-              //}//end if all name is empty 
-                // when all name is empty get the next row 
-                // else {
-                //     continue;
-                // }
             }// end while
-
-            // $str = $this->get_keys_arr($str);
-           // $str = $this->filterById($str);
-
+            //return string after add dob in each row
            $str = $this->edit_dob_in_eu($str);
             $this->putCsvFile($col,$str);
 
         }
-        /**************** */
         $str = ''; 
-        foreach($client_ar as $cid => $ar1 ){
-            $fn = $client_ar[$cid][16][0];
-            $ln = $client_ar[$cid][17][0];
-            $mn = $client_ar[$cid][18][0];
-            $whn = $client_ar[$cid][19][0];
-            $dob = implode(" ",$cl_dob[$cid]);
-            // echo "$cid | $fn |$ln |$mn |$whn |$dob <br>";
-        }
-
     } 
 
 
@@ -457,54 +419,7 @@ class Sanction {
         $string = "\"".$string."\"";
         return $string;
     }
-    function filterById($str){
-        $idArr = array();
-        $lines = explode("\n",$str);
-        $l = array();
-        foreach($lines as $line){
-            $line =  explode(';', $line);
-            array_push($idArr,$line[0]);
 
-            array_push($l,$line);
-        }
-        $goupedID = array_count_values($idArr);
-        $arr = array();
-        $result = array();
-        foreach ($l as $element) {
-            $result[$element[0]][] = $element;
-}
-    $emptyNameArr = array();
-        foreach($result as $key=>$n){
-
-
-        }
-        
-            // echo $val.'<br>';
-            // $dob =array();
-            // for($i=0 ; $i< $val;$i++){
-            //       $f1 = explode(';', $lines[$key +$i]);
-            //       array_merge($dob,$f1);
-                
-            //     }
-                
-            //     $arr = call_user_func_array('array_merge', $dob);
-            //    array_push($arr , $dob);
-                // echo'<pre>';
-                // print_r($f);
-                // echo'</pre>';
-
-            //}
-            // echo'<pre>';
-            //     print_r($goupedID);
-            //     echo'</pre>';
-                
-            // echo'<pre>';
-            // print_r($result);
-            // echo'</pre>';
-
-
-       // return $dob;
-    }
 //function to return DOB filter array contain dob and return all dob in string
 function get_dob($arr){
    $dob = '';
@@ -549,166 +464,92 @@ function get_nat($arr){
      }
         return "$fname;$lname";
  }
+/**
+ * this function receive string for all row and column befor send it to write in csv 
+ * 1- read eu files and extract each id in array $idArr;
+ * 2-count how many time key itrated ex:[13]=>5 [20]=>6
+ * 3-add dob for each id
+ * 4-looping throw array of Lines to check if row has dob or not
+ * 5-remove each row with null name
+ * 6-convert two dimention array to string separated each column with ; and each row with new line '/n'
 
-function dob_for_eachID($data){
-    
-   
-// $goupedID  = $this->get_keys_arr();
-// $i=1;
-//     if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
-
-//      while($data = fgetcsv($handle, 10000, ";")){
-//         //  echo $data[1];
-//         //  $data = explode(';',$data)
-//         //  print_r($data); 
-//         // $key = array_search($data[1],$goupedID,true);
-//            // echo $key;
-//     if(isset($data[1])){
-//       if($data[1] == $goupedID[$i] )
-//         // {$goupedID[$i] = $data[45];
-//         echo $goupedID[$i].'<br>';
-//     //}
-//         else 
-//         $i++;
-//     }else break;
-
-  //}
-//}
-    
-    // echo'<pre>';
-    // print_r($goupedID);
-    // echo '<pre>';
-    
-}
+ */
 function edit_dob_in_eu($str){
     $idArr = array();$i = 1;
     $id ; $dob;
+    // read csv file to return array with all id
     if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
         while($data = fgetcsv($handle, 10000, ";")){
            
            array_push($idArr , $data[1]);
         }
     }
+    //count how many time key itrated ex:[13]=>5 [20]=>6
     $goupedID = array_count_values($idArr);
+    // get the keys from goupedId ex: [0]=> Entity_Logical_Id [1]=>[13] [1]=>[25]
     $goupedID = array_keys($goupedID);
+    //remove first element in array witch is an array header [0]=> Entity_Logical_Id  the result will be [0]=>13 [1]=>25
     array_shift($goupedID);
-    // echo '<pre>';
-    //     print_r($goupedID);
-    // echo '</pre>';
-
-
 
     $dob = ''; $i =0;$id_dob = array();
+    //expload string to return array with each row
     $lines = explode("\n",$str);
-    //  echo'<pre>';
-    // print_r($lines);
-    // echo '<pre>';
-    foreach($lines as $counter=>$line){
-    //  echo'<pre>';
-    // print_r($goupedID);
-    // echo '<pre>';
-    $d1 = explode(";",$line);
     
-// echo $d1[0].'<br>';
-$id = str_replace('"','',$d1[0]);
- $id = intval($id) ;
-//  $id_dob[$id] =''; 
-      if($id == $goupedID[$i]){
-      
-             $d1[5] = str_replace('"','',$d1[5]);
+    foreach($lines as $counter=>$line){
+        //expload each line separated with ;
+    $d1 = explode(";",$line);
+    //remove " from each element
+    $id = str_replace('"','',$d1[0]);
+    //convert it to integer
+    $id = intval($id) ;
+    //add dob for each id
+        if($id == $goupedID[$i]){
+        
+                $d1[5] = str_replace('"','',$d1[5]);
+                
+                $dob .= strlen($d1[5]) != 0 ? "$d1[5],":'';
+                 $id_dob[$id] = "\"$dob\"";
             
-            $dob .= strlen($d1[5]) != 0 ? "$d1[5],":'';
-           $id_dob[$id] = "\"$dob\"";
-          
-            continue;
-      }
+                continue;
+        }
     
         else {
-            // $id_dob[$id]="\"$dob\"";
-            
-
-            // $d1[$counter][5] = "\"$dob\"" ;
-            // $d1[$counter][0] = "\"$d1[0]\"" ; 
-            // $d1 = implode(";",$d1);
-            // // $lines = implode(";",$d1);
-            // array_push($row , $d1);
-            
             $i++;
-            // echo'<pre>';
-            // print_r($id_dob);
-            // echo '</pre>';
             $dob = '';
             continue;
         }
-}// end foreach
-$lines_arr = array();$i=0;
-foreach($lines as $index=>$li){
-    $line_arr[] = explode(";",$li);
-    $s = str_replace('"','',$line_arr[$index][0]);
-    $s = intval($s);
-    //echo $index.'<br>';
-    if(isset($id_dob[$s])){
-        $line_arr[$index][5]= "$id_dob[$s]";
-    } 
-   // $key = array_search($id_dob[0], $id_dob);
-    //echo $line_arr[$index][5].'<br>';
-//     echo '<pre>';
-// print_r($line_arr[$index][5]);
-// echo '</pre>';
+    }// end foreach
 
+    $lines_arr = array();$i=0;
+    // looping throw array of Lines to check if row has dob or not
+    foreach($lines as $index=>$li){
+        $line_arr[] = explode(";",$li);
+        $s = str_replace('"','',$line_arr[$index][0]);
+        $s = intval($s);
+        if(isset($id_dob[$s])){
+            $line_arr[$index][5]= "$id_dob[$s]";
+        } 
 
-}// end foeach
-$line_arr = $this->removeEmptyNameRow($line_arr);
-$str2 = implode("\n",array_map(function($a) {return implode(";",$a);},$line_arr));
+    }// end foeach
+    // remove each row with null name
+    $line_arr = $this->removeEmptyNameRow($line_arr);
+    //implode twodimention array to string separated each column with ; and each row with new line \n
+    $str2 = implode("\n",array_map(function($a) {return implode(";",$a);},$line_arr));
 
-// $postArr = array_filter( $postArr );
-echo $str2;
-// echo $str2;
-
-// foreach($id_dob as $id=>$dob){
-    
-// foreach()    
-    // $filterArray = array_filter($lines, function ($var,$id) {
-    //     return (strpos($var, $id) == true);
-    // });
-//     echo '<pre>';
-// print_r($filterd_arr);
-// echo '</pre>';
-
-//}
-
-
-    // echo $dob;
-    
-
-    // echo'<pre>';
-    // print_r($goupedID);
-    // echo '<pre>';
-
-   return $str2;
+    return $str2;
 
 }
 function removeEmptyNameRow($array){
     $i = 0;
    foreach($array as $key => $subArray){
-    //     echo'<pre>';
-    // print_r($subArray[1]);
-    // echo '<pre>';
-    // echo strlen($subArray[1]).'<br>';
          if(isset($subArray[1])&&strlen($subArray[1]) <= 2
             &&isset($subArray[2])&& strlen($subArray[2]) <= 2
             &&isset($subArray[3])&& strlen($subArray[3]) <= 2 
             && isset($subArray[4])&&    strlen($subArray[4]) <= 2 
          ){
             unset($array[$key]);
-        // echo $i++.'<br>';
          }
-        //  exit;
     }
-    // echo'<pre>';
-    // print_r($array);
-    // echo '<pre>';
-
      return $array;
 }
 function get_filterd_arry($id,$lines){
