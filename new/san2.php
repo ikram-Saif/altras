@@ -126,11 +126,12 @@ class Sanction {
                 // }
             }// end while
 
-            $str = $this->get_keys_arr($str);
+            // $str = $this->get_keys_arr($str);
            // $str = $this->filterById($str);
 
-
+           $str = $this->edit_dob_in_eu($str);
             $this->putCsvFile($col,$str);
+
         }
         /**************** */
         $str = ''; 
@@ -552,7 +553,7 @@ function get_nat($arr){
 function dob_for_eachID($data){
     
    
-$goupedID  = $this->get_keys_arr();
+// $goupedID  = $this->get_keys_arr();
 // $i=1;
 //     if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
 
@@ -579,7 +580,7 @@ $goupedID  = $this->get_keys_arr();
     // echo '<pre>';
     
 }
-function get_keys_arr($str){
+function edit_dob_in_eu($str){
     $idArr = array();$i = 1;
     $id ; $dob;
     if (($handle = fopen("san-output.csv", "r")) !== FALSE) {
@@ -594,35 +595,88 @@ function get_keys_arr($str){
     // echo '<pre>';
     //     print_r($goupedID);
     // echo '</pre>';
-    $dob = ''; $i =0;$row = '';
+
+
+
+    $dob = ''; $i =0;$id_dob = array();
     $lines = explode("\n",$str);
-    foreach($lines as $line){
-        $d1 = explode(";",$line);
+    //  echo'<pre>';
+    // print_r($lines);
+    // echo '<pre>';
+    foreach($lines as $counter=>$line){
     //  echo'<pre>';
     // print_r($goupedID);
     // echo '<pre>';
     $d1 = explode(";",$line);
     
 // echo $d1[0].'<br>';
-$d1[0] = str_replace('"','',$d1[0]);
-      if($d1[0] == $goupedID[$i]){
-        $d1[5] = str_replace('"','',$d1[5]);
-
+$id = str_replace('"','',$d1[0]);
+ $id = intval($id) ;
+//  $id_dob[$id] =''; 
+      if($id == $goupedID[$i]){
+      
+             $d1[5] = str_replace('"','',$d1[5]);
+            
             $dob .= strlen($d1[5]) != 0 ? "$d1[5],":'';
+           $id_dob[$id] = "\"$dob\"";
+          
+            continue;
       }
     
         else {
-            $d1[5] = "\"$dob\"" ; 
-            $d1 = implode(";",$d1);
-            $row .= "$d1\n";
+            // $id_dob[$id]="\"$dob\"";
+            
 
+            // $d1[$counter][5] = "\"$dob\"" ;
+            // $d1[$counter][0] = "\"$d1[0]\"" ; 
+            // $d1 = implode(";",$d1);
+            // // $lines = implode(";",$d1);
+            // array_push($row , $d1);
+            
             $i++;
-
+            // echo'<pre>';
+            // print_r($id_dob);
+            // echo '</pre>';
             $dob = '';
-
+            continue;
         }
 }// end foreach
-echo $row;
+$lines_arr = array();$i=0;
+foreach($lines as $index=>$li){
+    $line_arr[] = explode(";",$li);
+    $s = str_replace('"','',$line_arr[$index][0]);
+    $s = intval($s);
+    //echo $index.'<br>';
+    if(isset($id_dob[$s])){
+        $line_arr[$index][5]= "$id_dob[$s]";
+    } 
+   // $key = array_search($id_dob[0], $id_dob);
+    //echo $line_arr[$index][5].'<br>';
+//     echo '<pre>';
+// print_r($line_arr[$index][5]);
+// echo '</pre>';
+
+
+}// end foeach
+$line_arr = $this->removeEmptyNameRow($line_arr);
+$str2 = implode("\n",array_map(function($a) {return implode(";",$a);},$line_arr));
+
+// $postArr = array_filter( $postArr );
+echo $str2;
+// echo $str2;
+
+// foreach($id_dob as $id=>$dob){
+    
+// foreach()    
+    // $filterArray = array_filter($lines, function ($var,$id) {
+    //     return (strpos($var, $id) == true);
+    // });
+//     echo '<pre>';
+// print_r($filterd_arr);
+// echo '</pre>';
+
+//}
+
 
     // echo $dob;
     
@@ -631,8 +685,38 @@ echo $row;
     // print_r($goupedID);
     // echo '<pre>';
 
-    // return array_keys($goupedID);
+   return $str2;
 
+}
+function removeEmptyNameRow($array){
+    $i = 0;
+   foreach($array as $key => $subArray){
+    //     echo'<pre>';
+    // print_r($subArray[1]);
+    // echo '<pre>';
+    // echo strlen($subArray[1]).'<br>';
+         if(isset($subArray[1])&&strlen($subArray[1]) <= 2
+            &&isset($subArray[2])&& strlen($subArray[2]) <= 2
+            &&isset($subArray[3])&& strlen($subArray[3]) <= 2 
+            && isset($subArray[4])&&    strlen($subArray[4]) <= 2 
+         ){
+            unset($array[$key]);
+        // echo $i++.'<br>';
+         }
+        //  exit;
+    }
+    // echo'<pre>';
+    // print_r($array);
+    // echo '<pre>';
+
+     return $array;
+}
+function get_filterd_arry($id,$lines){
+    $filterArray = array_filter($lines, function ($var,$id) {
+            return (strpos($var, $id) == true);
+        });
+        return $filterArray;
+    
 }
  
 }//end class 
