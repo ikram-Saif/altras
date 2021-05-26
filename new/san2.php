@@ -102,6 +102,7 @@ class Sanction {
             }// end while
             //return string after add dob in each row
            $str = $this->edit_dob_in_eu($str);
+            unset($col[0]);
             $this->putCsvFile($col,$str);
 
         }
@@ -348,6 +349,7 @@ class Sanction {
         $result = array();
         $f = fopen($this->output_san, 'w');
         // fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+       
         fputcsv($f , $header , ';');
         $rows = explode("\n",$lines);
         foreach($rows as  $row){
@@ -356,6 +358,8 @@ class Sanction {
         $d1 = explode(";",$row);
         fputcsv($f,$d1,';',' ');
         }
+        $stat = fstat($f);
+        ftruncate($f, $stat['size']-2);
         fclose($f);
         $processComplete = 'complete';
 
@@ -384,7 +388,7 @@ class Sanction {
             echo "\xEF\xBB\xBF"; // UTF-8 BOM
             header("Pragma: no-cache");
             
-            header('Content-Length: ' . filesize($this->output_san));
+            // header('Content-Length: ' . filesize($this->output_san));
             readfile($this->output_san);
             exit;
         }
@@ -491,7 +495,7 @@ function edit_dob_in_eu($str){
     //remove first element in array witch is an array header [0]=> Entity_Logical_Id  the result will be [0]=>13 [1]=>25
     array_shift($goupedID);
 
-    $dob = ''; $i =0;$id_dob = array();
+    $dob = array(); $i =0;$id_dob = array();
     //expload string to return array with each row
     $lines = explode("\n",$str);
     
@@ -506,16 +510,25 @@ function edit_dob_in_eu($str){
         if($id == $goupedID[$i]){
         
                 $d1[5] = str_replace('"','',$d1[5]);
-                
-                $dob .= strlen($d1[5]) != 0 ? "$d1[5],":'';
-                 $id_dob[$id] = "\"$dob\"";
-            
+              
+
+                if(strlen($d1[5]) != 0){
+                        // $dob = "$d1[5],";
+                        array_push($dob,$d1[5]);
+                        
+
+                }
+                $dob = array_unique($dob);
+               
+                $str_dob = implode(',',$dob);
+                $id_dob[$id] = "\"$str_dob\"";
+               
                 continue;
         }
     
         else {
             $i++;
-            $dob = '';
+             $dob = array();
             continue;
         }
     }// end foreach
@@ -549,6 +562,8 @@ function removeEmptyNameRow($array){
          ){
             unset($array[$key]);
          }
+         unset($array[$key][0]);
+
     }
      return $array;
 }
